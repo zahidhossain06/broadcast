@@ -28,11 +28,11 @@
     <string name="send_broadcast">Send broadcast</string>
     <string name="not_received_yet">Not received yet. Press the button to send the broadcast.</string>
 
-    <string name="image_hint">Pinch with two fingers to zoom in and out</string>
-    <string name="image_failed">Could not load the image. Check the internet connection.</string>
+    <string name="image_hint">Pinch to zoom, drag to move, double tap to reset</string>
+    <string name="image_failed">No internet, showing the copy saved in the app.</string>
     <string name="image_description">Image loaded from the internet</string>
 
-    <string name="audio_title">Sample audio</string>
+    <string name="audio_title">Sunny - music track</string>
     <string name="play">Play</string>
     <string name="pause">Pause</string>
     <string name="stop">Stop</string>

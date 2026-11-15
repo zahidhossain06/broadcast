@@ -5,6 +5,8 @@ import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
+import android.view.GestureDetector;
+import android.view.MotionEvent;
 import android.view.ScaleGestureDetector;
 import android.view.View;
 import android.widget.ImageView;
@@ -18,19 +20,21 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 
 // Loads an image from the internet and lets the user zoom it with a pinch gesture.
+// Drag with one finger to move a zoomed image, double tap to reset.
 public class ImageFragment extends Fragment {
 
-    // the second link is only a backup if the first one fails
-    private static final String[] IMAGE_URLS = {
-            "https://upload.wikimedia.org/wikipedia/commons/thumb/3/3f/Fronalpstock_big.jpg/960px-Fronalpstock_big.jpg",
-            "https://picsum.photos/id/1015/960/640.jpg"
-    };
+    // same picture as res/drawable/sample_image.jpg, served from the GitHub repo
+    private static final String IMAGE_URL =
+            "https://raw.githubusercontent.com/zahidhossain06/broadcast/main/app/src/main/res/drawable/sample_image.jpg";
 
     private final Handler handler = new Handler(Looper.getMainLooper());
     private ImageView imageView;
     private View progress;
+
     private ScaleGestureDetector scaleDetector;
+    private GestureDetector tapDetector;
     private float scale = 1f;
+    private float lastX, lastY;
 
     public ImageFragment() {
         super(R.layout.fragment_image);
@@ -43,27 +47,64 @@ public class ImageFragment extends Fragment {
         imageView = view.findViewById(R.id.image_view);
         progress = view.findViewById(R.id.progress);
 
-        // pinch gesture: change the scale of the image view
+        // 1. pinch: two fingers apart = bigger, together = smaller
         scaleDetector = new ScaleGestureDetector(requireContext(),
                 new ScaleGestureDetector.SimpleOnScaleGestureListener() {
                     @Override
                     public boolean onScale(ScaleGestureDetector detector) {
                         scale = scale * detector.getScaleFactor();
-                        scale = Math.max(0.5f, Math.min(scale, 5f));
+                        scale = Math.max(1f, Math.min(scale, 5f)); // between 1x and 5x
                         imageView.setScaleX(scale);
                         imageView.setScaleY(scale);
                         return true;
                     }
                 });
-        view.setOnTouchListener((v, event) -> {
+
+        // 2. double tap: back to normal size
+        tapDetector = new GestureDetector(requireContext(),
+                new GestureDetector.SimpleOnGestureListener() {
+                    @Override
+                    public boolean onDoubleTap(MotionEvent e) {
+                        resetZoom();
+                        return true;
+                    }
+                });
+
+        // the touch listener sits on the ImageView itself so it gets every finger event
+        imageView.setOnTouchListener((v, event) -> {
             scaleDetector.onTouchEvent(event);
-            return true;
+            tapDetector.onTouchEvent(event);
+
+            // 3. one finger drag moves the picture when it is zoomed in
+            switch (event.getActionMasked()) {
+                case MotionEvent.ACTION_DOWN:
+                    lastX = event.getRawX();
+                    lastY = event.getRawY();
+                    break;
+                case MotionEvent.ACTION_MOVE:
+                    if (event.getPointerCount() == 1 && !scaleDetector.isInProgress() && scale > 1f) {
+                        imageView.setTranslationX(imageView.getTranslationX() + event.getRawX() - lastX);
+                        imageView.setTranslationY(imageView.getTranslationY() + event.getRawY() - lastY);
+                    }
+                    lastX = event.getRawX();
+                    lastY = event.getRawY();
+                    break;
+            }
+            return true; // we handled the touch
         });
 
         loadImage();
     }
 
-    // network work must not run on the main thread
+    private void resetZoom() {
+        scale = 1f;
+        imageView.setScaleX(1f);
+        imageView.setScaleY(1f);
+        imageView.setTranslationX(0f);
+        imageView.setTranslationY(0f);
+    }
+
+    // network work must not run on the main thread, so it runs on a new Thread
     private void loadImage() {
         new Thread(() -> {
             Bitmap bitmap = download();
@@ -75,6 +116,8 @@ public class ImageFragment extends Fragment {
                 if (bitmap != null) {
                     imageView.setImageBitmap(bitmap);
                 } else {
+                    // no internet: show the copy that is inside the app
+                    imageView.setImageResource(R.drawable.sample_image);
                     Toast.makeText(requireContext(), R.string.image_failed, Toast.LENGTH_LONG).show();
                 }
             });
@@ -82,23 +125,18 @@ public class ImageFragment extends Fragment {
     }
 
     private Bitmap download() {
-        for (String address : IMAGE_URLS) {
-            try {
-                HttpURLConnection connection = (HttpURLConnection) new URL(address).openConnection();
-                connection.setConnectTimeout(10000);
-                connection.setReadTimeout(15000);
-                connection.setRequestProperty("User-Agent", "CSE489Assignment2/1.0 (student project)");
-                if (connection.getResponseCode() == 200) {
-                    InputStream in = connection.getInputStream();
-                    Bitmap bitmap = BitmapFactory.decodeStream(in);
-                    in.close();
-                    if (bitmap != null) {
-                        return bitmap;
-                    }
-                }
-            } catch (Exception e) {
-                // try the next link
+        try {
+            HttpURLConnection connection = (HttpURLConnection) new URL(IMAGE_URL).openConnection();
+            connection.setConnectTimeout(10000);
+            connection.setReadTimeout(15000);
+            if (connection.getResponseCode() == 200) {
+                InputStream in = connection.getInputStream();
+                Bitmap bitmap = BitmapFactory.decodeStream(in);
+                in.close();
+                return bitmap;
             }
+        } catch (Exception e) {
+            // no internet or bad link
         }
         return null;
     }
