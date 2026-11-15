@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">App</string>
+    <string name="open_drawer">Open menu</string>
+    <string name="close_drawer">Close menu</string>
+
+    <string name="menu_broadcast">Broadcast Receiver</string>
+    <string name="menu_image">Image Scale</string>
+    <string name="menu_video">Video</string>
+    <string name="menu_audio">Audio</string>
+
+    <string name="select_type">Select a broadcast type</string>
+    <string name="proceed">Proceed</string>
+    <string-array name="broadcast_types">
+        <item>Custom broadcast receiver</item>
+        <item>System battery notification receiver</item>
+    </string-array>
+
+    <string name="custom_heading">Enter a message to send with the custom broadcast</string>
+    <string name="message_hint">Type a message</string>
+    <string name="battery_heading">Battery percentage (system broadcast)</string>
+    <string name="battery_waiting">Waiting for battery broadcast...</string>
+    <string name="next">Next</string>
+    <string name="enter_message">Please type a message first</string>
+
+    <string name="third_nothing">Nothing to do here for the battery option.</string>
+    <string name="third_waiting">Message from the second activity:</string>
+    <string name="send_broadcast">Send broadcast</string>
+    <string name="not_received_yet">Not received yet. Press the button to send the broadcast.</string>
+
+    <string name="image_hint">Pinch with two fingers to zoom in and out</string>
+    <string name="image_failed">Could not load the image. Check the internet connection.</string>
+    <string name="image_description">Image loaded from the internet</string>
+
+    <string name="audio_title">Sample audio</string>
+    <string name="play">Play</string>
+    <string name="pause">Pause</string>
+    <string name="stop">Stop</string>
+    <string name="status_ready">Ready</string>
+    <string name="status_playing">Playing</string>
+    <string name="status_paused">Paused</string>
+    <string name="status_stopped">Stopped</string>
+    <string name="status_finished">Finished</string>
+    <string name="status_error">Could not load the audio file</string>
+</resources>

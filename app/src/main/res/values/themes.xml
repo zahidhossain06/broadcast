@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Second and Third activity use the normal action bar -->
+    <style name="Theme.CSE489A2" parent="Theme.Material3.Light" />
+
+    <!-- Main activity draws its own toolbar so the drawer can sit beside it -->
+    <style name="Theme.CSE489A2.NoActionBar" parent="Theme.Material3.Light.NoActionBar" />
+</resources>
